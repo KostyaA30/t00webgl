@@ -1,0 +1,30 @@
+@font-face {
+    font-family: "Monserrat Alternates";
+    src: url("../bin/fonts/MontserratAlternates-Black.ttf");
+}
+
+ol {                       
+    font-size: 200%;
+    color: #ffafaf;
+    list-style-type: none;
+}
+li {
+    background: none;
+    margin: 20px;
+    list-style-type: none;
+}
+
+a {                       
+    font-size: 80%;
+    color: #ffffff;
+    text-decoration: none;
+}
+a:hover {                       
+    font-size: 90%;
+    color: #ffffff;
+    text-decoration: underline;
+    transition: all 300ms ease;
+} 
+body {
+    background-color: #240d6cef;
+}
