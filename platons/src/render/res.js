@@ -101,7 +101,7 @@ class _resources {
     static onDownloadXHR() {
         if (this.readyState === XMLHttpRequest.DONE) {
             let d = objLoader.parseObjText(this.responseText, false);
-            let mesh = gl.сreateMeshVAO(this.fObjName, d[0], d[1], d[2], d[3], 3);
+            let mesh = gl.fCreateMeshVAO(this.fObjName, d[0], d[1], d[2], d[3], 3);
 
             _resources.loadNextItem();
         }
@@ -110,7 +110,7 @@ class _resources {
     static onDownloadSuccess() {
         if (this instanceof Image || this.tagName == "VIDEO") {
             let dat = this.queueData;
-            _resources.gl.LoadTexture(dat.name, this);
+            _resources.gl.fLoadTexture(dat.name, this);
         }
         _resources.loadNextItem();
     }

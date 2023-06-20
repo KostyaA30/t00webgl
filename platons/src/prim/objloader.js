@@ -1,15 +1,27 @@
 export class objLoader {
-    static domToMesh(meshName, elmID, flipYUV, keepRawData) {
-        var d = objLoader.parseFromDom(elmID, flipYUV);
-        var mesh = gl.сreateMeshVAO(meshName, d[0], d[1], d[2], d[3], 3);
+    constructor() {
+    }
 
-        if (keepRawData) {
-            mesh.aIndex = d[0];
-            mesh.aVert = d[1];
-            mesh.aNorm = d[2];
-        }
+    LoadMeshFromFile(gl, meshName, flipYUV, keepRawData) {
+        const ft2 = fetch("../bin/models/cow.obj")
+            .then((res) => res.text())
+            .then((data) => {
+                textObj = data;
+        });
+        const allData = Promise.all([ft2]);
 
-        return mesh;
+        allData.then((res) => {
+            let d = objLoader.parseObjText(textObj, flipYUV);
+            this.mesh = gl.fCreateMeshVAO(meshName, d[0], d[1], d[2], d[3], 3);
+
+            if (keepRawData) {
+                mesh.aIndex = d[0];
+                mesh.aVert = d[1];
+                mesh.aNorm = d[2];
+            }
+        });
+
+        return undefined;
     }
 
     static parseFromDom(elmID, flipYUV) {
@@ -19,24 +31,11 @@ export class objLoader {
     static parseObjText(txt, flipYUV) {
         txt = txt.trim() + "\n";
 
-        var line,
-            itm,
-            ary,
-            i,
-            chr,
-            ind,
-            isQuad = false,
+        let line, itm, array, i, chr, ind, isQuad = false,
             aCache = [],
-            cVert = [],
-            cNorm = [],
-            cUV = [],
-            fVert = [],
-            fNorm = [],
-            fUV = [],
-            fIndex = [],
-            fIndexCnt = 0,
-            posA = 0,
-            posB = txt.indexOf("\n", 0);
+            cVert = [], cNorm = [], cUV = [],
+            fVert = [], fNorm = [], fUV = [], fIndex = [], fIndexCnt = 0,
+            posA = 0, posB = txt.indexOf("\n", 0);
 
         while (posB > posA) {
             line = txt.substring(posA, posB).trim();
@@ -72,16 +71,16 @@ export class objLoader {
                         if (itm[i] in aCache) {
                             fIndex.push(aCache[itm[i]]);
                         } else {
-                            ary = itm[i].split("/");
+                            array = itm[i].split("/");
 
-                            ind = (parseInt(ary[0]) - 1) * 3;
+                            ind = (parseInt(array[0]) - 1) * 3;
                             fVert.push(cVert[ind], cVert[ind + 1], cVert[ind + 2]);
 
-                            ind = (parseInt(ary[2]) - 1) * 3;
+                            ind = (parseInt(array[2]) - 1) * 3;
                             fNorm.push(cNorm[ind], cNorm[ind + 1], cNorm[ind + 2]);
 
-                            if (ary[1] != "") {
-                                ind = (parseInt(ary[1]) - 1) * 2;
+                            if (array[1] != "") {
+                                ind = (parseInt(array[1]) - 1) * 2;
                                 fUV.push(cUV[ind], !flipYUV ? cUV[ind + 1] : 1 - cUV[ind + 1]);
                             }
 

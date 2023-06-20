@@ -1,13 +1,6 @@
 import { transform } from "../mth/transform.js";
 import { shadersUtil } from "../render/shaders/shaders.js";
 
-const ATTR_POSITION_NAME = "a_position";
-const ATTR_POSITION_LOC = 0;
-const ATTR_NORMAL_NAME = "a_norm";
-const ATTR_NORMAL_LOC = 1;
-const ATTR_UV_NAME = "a_uv";
-const ATTR_UV_LOC = 2;
-
 class _gridFloor {
     constructor(gl, incAxis) {
         this.transform = transform();

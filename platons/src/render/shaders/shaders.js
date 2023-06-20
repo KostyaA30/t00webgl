@@ -1,16 +1,10 @@
-const ATTR_POSITION_NAME = "a_position";
-const ATTR_POSITION_LOC = 0;
-const ATTR_NORMAL_NAME = "a_norm";
-const ATTR_NORMAL_LOC = 1;
-const ATTR_UV_NAME = "a_uv";
-const ATTR_UV_LOC = 2;
-
 class _shaderBuilder {
     constructor(gl, vertShaders, fragShaders) {
         if (vertShaders === undefined || vertShader === null || vertShaders.length < 20) {
             vertShaders = `#version 300 es
 
 in vec4 a_position;
+in vec4 a_color;
 in vec3 a_norm;
 in vec2 a_uv;
 
@@ -27,12 +21,7 @@ out highp vec2 vUV;
 out lowp vec3 color;
 
 void main( void ) {
-    if (a_position.w == 0.0)
-        color = vec3(1.0, 0.0, 0.0);
-    else if (a_position.w == 1.0)
-        color = vec3(0.0, 1.0, 0.0);
-    else
-        color = vec3(0.6, 0.6, 0.6);
+    color = a_color.xyz;
 
     vUV = a_uv;
     gl_Position = matProjection * matCameraView * uMVMatrix * vec4(a_position.xyz, 1.0);
@@ -45,7 +34,7 @@ in lowp vec3 color;
 out vec4 outColor;
 
 void main( void ) {
-    outColor = vec4(color,1.0);
+    outColor = vec4(color, 1.0);
 }`;
         // this.loadFromFile(vertShaders, fragShaders);
         }
@@ -176,49 +165,49 @@ void main( void ) {
         return this;
     }
 
-    renderModel(model, doShaderClose) {
-        this.setUniforms("uMVMatrix", model.transform.getViewMatrix().toArray());
-        this.gl.bindVertexArray(model.mesh.vao);
+    renderModel(model, doShaderClose, ind) {
+        this.setUniforms("uMVMatrix", model.transform[ind].getViewMatrix().toArray());
+        this.gl.bindVertexArray(model.mesh[ind].vao);
 
-        if (model.mesh.noCulling || this.noCulling) this.gl.disable(this.gl.CULL_FACE);
-        if (model.mesh.doBlending || this.doBlending) this.gl.enable(this.gl.BLEND);
+        if (model.mesh[ind].noCulling || this.noCulling) this.gl.disable(this.gl.CULL_FACE);
+        if (model.mesh[ind].doBlending || this.doBlending) this.gl.enable(this.gl.BLEND);
 
-        if (model.mesh.indexCount) this.gl.drawElements(model.mesh.drawMode, model.mesh.indexCount, this.gl.UNSIGNED_SHORT, 0);
-        else this.gl.drawArrays(model.mesh.drawMode, 0, model.mesh.vertexCount);
+        if (model.mesh[ind].indexCount) this.gl.drawElements(model.mesh[ind].drawMode, model.mesh[ind].indexCount, this.gl.UNSIGNED_SHORT, 0);
+        else this.gl.drawArrays(model.mesh[ind].drawMode, 0, model.mesh[ind].vertexCount);
 
         this.gl.bindVertexArray(null);
-        if (model.mesh.noCulling || this.noCulling) this.gl.enable(this.gl.CULL_FACE);
-        if (model.mesh.doBlending || this.doBlending) this.gl.disable(this.gl.BLEND);
+        if (model.mesh[ind].noCulling || this.noCulling) this.gl.enable(this.gl.CULL_FACE);
+        if (model.mesh[ind].doBlending || this.doBlending) this.gl.disable(this.gl.BLEND);
 
         if (doShaderClose) this.gl.useProgram(null);
 
         return this;
     }
 
-    renderModelVR(model, vr) {
-        this.setUniforms("uMVMatrix", model.transform.getViewMatrix());
-        this.gl.bindVertexArray(model.mesh.vao);
+    renderModelVR(model, vr, ind) {
+        this.setUniforms("uMVMatrix", model.transform[ind].getViewMatrix());
+        this.gl.bindVertexArray(model.mesh[ind].vao);
 
-        if (model.mesh.noCulling || this.noCulling) this.gl.disable(this.gl.CULL_FACE);
-        if (model.mesh.doBlending || this.doBlending) this.gl.enable(this.gl.BLEND);
+        if (model.mesh[ind].noCulling || this.noCulling) this.gl.disable(this.gl.CULL_FACE);
+        if (model.mesh[ind].doBlending || this.doBlending) this.gl.enable(this.gl.BLEND);
 
         this.gl.viewport(0, 0, this.gl.fWidth * 0.5, this.gl.fHeight);
         this.gl.uniformMatrix4fv(this.mUniformList["uPMatrix"].loc, false, vr.fFrameData.leftProjectionMatrix);
         this.gl.uniformMatrix4fv(this.mUniformList["uCameraMatrix"].loc, false, vr.fGetEyeMatrix(0));
 
-        if (model.mesh.indexCount) this.gl.drawElements(model.mesh.drawMode, model.mesh.indexCount, gl.UNSIGNED_SHORT, 0);
-        else this.gl.drawArrays(model.mesh.drawMode, 0, model.mesh.vertexCount);
+        if (model.mesh[ind].indexCount) this.gl.drawElements(model.mesh[ind].drawMode, model.mesh[ind].indexCount, gl.UNSIGNED_SHORT, 0);
+        else this.gl.drawArrays(model.mesh[ind].drawMode, 0, model.mesh[ind].vertexCount);
 
         gl.viewport(this.gl.fWidth * 0.5, 0, this.gl.fWidth * 0.5, this.gl.fHeight);
         this.gl.uniformMatrix4fv(this.mUniformList["uPMatrix"].loc, false, vr.fFrameData.rightProjectionMatrix);
         this.gl.uniformMatrix4fv(this.mUniformList["uCameraMatrix"].loc, false, vr.fGetEyeMatrix(1));
 
-        if (model.mesh.indexCount) this.gl.drawElements(model.mesh.drawMode, model.mesh.indexCount, gl.UNSIGNED_SHORT, 0);
-        else this.gl.drawArrays(model.mesh.drawMode, 0, model.mesh.vertexCount);
+        if (model.mesh[ind].indexCount) this.gl.drawElements(model.mesh[ind].drawMode, model.mesh[ind].indexCount, gl.UNSIGNED_SHORT, 0);
+        else this.gl.drawArrays(model.mesh[ind].drawMode, 0, model.mesh[ind].vertexCount);
 
         this.gl.bindVertexArray(null);
-        if (model.mesh.noCulling || this.noCulling) this.gl.enable(this.gl.CULL_FACE);
-        if (model.mesh.doBlending || this.doBlending) this.gl.disable(this.gl.BLEND);
+        if (model.mesh[ind].noCulling || this.noCulling) this.gl.enable(this.gl.CULL_FACE);
+        if (model.mesh[ind].doBlending || this.doBlending) this.gl.disable(this.gl.BLEND);
 
         return this;
     }
@@ -255,6 +244,7 @@ export class shadersUtil {
         gl.attachShader(prog, fShader);
 
         gl.bindAttribLocation(prog, ATTR_POSITION_LOC, ATTR_POSITION_NAME);
+        gl.bindAttribLocation(prog, ATTR_COLOR_LOC, ATTR_COLOR_NAME);
         gl.bindAttribLocation(prog, ATTR_NORMAL_LOC, ATTR_NORMAL_NAME);
         gl.bindAttribLocation(prog, ATTR_UV_LOC, ATTR_UV_NAME);
 
@@ -314,6 +304,7 @@ export class shadersUtil {
     static getStandardAttribLocations(gl, program) {
         return {
             position: gl.getAttribLocation(program, ATTR_POSITION_NAME),
+            position: gl.getAttribLocation(program, ATTR_COLOR_NAME),
             norm: gl.getAttribLocation(program, ATTR_NORMAL_NAME),
             uv: gl.getAttribLocation(program, ATTR_UV_NAME),
         };

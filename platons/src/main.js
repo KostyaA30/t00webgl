@@ -7,14 +7,15 @@ import { shaderBuilder } from "./render/shaders/shaders.js";
 import { model } from "./prim/models.js";
 import { primitivies } from "./prim/prims.js";
 import { UBO } from "./render/ubo.js";
-    
+import { objLoader } from "./prim/objloader.js";
+
 let gl, gRLoop, gShader, gModel, gCamera, gCameraCtrl;
 let gGridFloor, aPrims, mDebugVerts, mDebugLine;
 
 export function onLoad(idCanvas) {
     let webGL = webgl();
 
-    gl = webGL.init(idCanvas).fitScreen(0.95, 0.9).fClear();
+    gl = webGL.init(idCanvas).fFitScreen(0.95, 0.9).fClear();
 
     gCamera = camera(gl);
     gCamera.transform.position.set(0, 1, 3);
@@ -34,27 +35,58 @@ export function onLoad(idCanvas) {
         },
     ]);
 
-    UBO.Cache["MatTransform"].update("matProjection",gCamera.projectionMatrix);
+    UBO.Cache["MatTransform"].update("matProjection", gCamera.projectionMatrix.toArray());
 
     onReady();
 }
+
+let objMd, objMesh;
 
 function onReady(){
     gShader = shaderBuilder(gl)
         .prepareUniforms("uMVMatrix", "mat4")
         .prepareUniformBlocks(UBO.Cache["MatTransform"], 0)
 
+    gModel = model();
     let cubeMesh = primitivies.cube.createMesh(gl, "cube", 1, 1, 1, 0, 0, 0, false);
-    gModel = model(cubeMesh).setPosition(0,0.5,0);
+    let tetraMesh = primitivies.tetrahedron.createMesh(gl, "tetrahedron", 1.0, false);
+    let octaMesh = primitivies.octahedron.createMesh(gl, "octahedron", 1.0, false);
+    let dodMesh = primitivies.dodecahedron.createMesh(gl, "dodecahedron", false);
+    let icoMesh = primitivies.icosahedron.createMesh(gl, "icosahedron", 1.0, false);
+    objMd = new objLoader();
+    objMd.LoadMeshFromFile(gl, "cow");
+    gModel.add(cubeMesh);
+    gModel.add(tetraMesh);
+    gModel.add(octaMesh);
+    gModel.add(dodMesh);
+    gModel.add(icoMesh);
+    gModel.setPosition(-4.0, 0.5, 0, 0);
+    gModel.setRotation(45.0, 45.0, 45.0, 0);
+    gModel.setPosition(-2.0, 0.5, 0.0, 1);
+    gModel.setPosition(0.0, 0.5, 0.0, 2);
+    gModel.setPosition(0.0, -1.5, 0.0, 3);
+    gModel.setScale(0.05, 0.05, 0.05, 3);
+    gModel.setPosition(4.0, 0.5, 0.0, 4);
     
     gRLoop.start();
 }
+
+let flg = 1;
 
 function onRender(dt) {
     gl.fClear();
     gCamera.updateViewMatrix();
     UBO.Cache["MatTransform"].update("matCameraView", gCamera.viewMatrix.toArray());
 
+    if (textObj !== undefined && flg) {
+        objMesh = objMd.mesh;
+        gModel.add(objMesh);
+        gModel.setPosition(0.0, 0.0, 4.0, 5);
+        gModel.setScale(0.1, 0.1, 0.1, 5);
+        flg = 0;
+    }
+
     gGridFloor.render(gCamera);
-    gShader.preRender().renderModel(gModel.preRender());
+    for (let i = 0; i < gModel.transform.length; i++)
+        gShader.preRender().renderModel(gModel.preRender(), false, i);
 }

@@ -6,15 +6,15 @@
         <link rel = "stylesheet" type = "text/css" href = "../styles/all.css" />
     </head>
     <body>
+        <script src = "./src/def.js"></script>
         <ol style = "padding: 10px; margin: 10px;"><a href = "../index.html">Home</a></ol>
         <canvas id = "PlatonCanvas"></canvas>
         <script type = "module">
             import { onLoad } from "./src/main.js";
-
+            
             window.addEventListener("load", () => {
                 onLoad("PlatonCanvas");
             });
         </script>
-        <script type = "module" src = "src/def.js"></script>
     </body>
 </html>
